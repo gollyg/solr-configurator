@@ -32,24 +32,25 @@ class SynonymCommand extends Command
       ->setDescription('Converts files to Solr syntax')
       ->addArgument('input', InputArgument::REQUIRED, 'CSV file containing Solr values')
       ->addArgument('output', InputArgument::OPTIONAL, 'The name of the created file. If none is provided output will be printed to screen.')
-      ->addOption('implicit', 'i', null, 'Use implicit Solr formatting.');
+      ->addOption('implicit', 'i', null, 'Use implicit Solr formatting.')
+      ->addOption('no-header', 'h', NULL, 'Don\'t skip first row data.');
   }
 
   protected function execute(InputInterface $input, OutputInterface $output)
   {
-
     $output_file = $input->getArgument('output');
     $expansive = $input->getOption('implicit');
+    $no_header = $input->getOption('no-header');
     $items = array();
 
-    //load file
+    //load source file
     $input_file = $input->getArgument('input');
     $csv = Reader::createFromPath($input_file);
 
-    // ignore header
-    $csv->setOffset(1);
-    $csv->setDelimiter(',');
-    $csv->setNewline("\n");
+    // Ignore header by default
+    if (!$no_header) {
+      $csv->setOffset(1);
+    }
 
     $results = $csv->fetch();
 
