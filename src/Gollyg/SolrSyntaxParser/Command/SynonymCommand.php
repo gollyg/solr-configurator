@@ -33,7 +33,7 @@ class SynonymCommand extends Command
       ->addArgument('input', InputArgument::REQUIRED, 'CSV file containing Solr values')
       ->addArgument('output', InputArgument::OPTIONAL, 'The name of the created file. If none is provided output will be printed to screen.')
       ->addOption('implicit', 'i', null, 'Use implicit Solr formatting.')
-      ->addOption('no-header', 'h', NULL, 'Don\'t skip first row data.');
+      ->addOption('no-header', 'H', NULL, 'Don\'t skip first row data.');
   }
 
   protected function execute(InputInterface $input, OutputInterface $output)
@@ -57,13 +57,16 @@ class SynonymCommand extends Command
     foreach ($results as $row) {
       // sanity check on the format
       if (empty($row[0]) || empty($row[1])) continue;
+      // trim the items
+      $row = array_map('trim', $row);
+      // remove any special characters
+      $row = preg_replace("/[^a-zA-Z0-9() ,\/]/", "", $row);
 
       if (!$expansive) {
-        // default format - explicit
-        $line = $row[0] . ' => ' . $row[1];
+        $line = $row[0] . ' => ' . $row[0] . ', ' . $row[1];
       }
       else {
-        $line = implode(' , ', $row);
+        $line = implode(', ', $row);
       }
       $items[] = $line;
     }
